@@ -1,0 +1,26 @@
+📅 Plan de formation intensif sur 3 jours
+🔹 Jour 1 : Les bases solides (Node.js, TypeScript, Express, Sequelize, API REST)
+
+🔥 Comprendre Node.js et pourquoi il est utilisé côté serveur.
+🔥 Introduction à TypeScript (types, interfaces, classes).
+🔥 Installer et configurer un projet Express + TypeScript.
+🔥 Comprendre Express et créer des routes basiques.
+🔥 Introduction à Sequelize (ORM pour base de données).
+🔥 Création d’une première API CRUD complète avec Sequelize.
+🔥 Explication détaillée de chaque ligne de code et mise en pratique.
+🔹 Jour 2 : Sécurité, JWT, Middleware et gestion des utilisateurs
+
+🔥 Comprendre et utiliser dotenv (variables d’environnement).
+🔥 Mise en place de l’authentification JWT (création et validation de tokens).
+🔥 Middleware pour protéger les routes (seulement les utilisateurs connectés).
+🔥 Gestion des mots de passe avec bcrypt (hashing sécurisé).
+🔥 Création d’un système d’authentification complet (inscription + connexion + accès sécurisé).
+🔥 Explication détaillée de chaque ligne de code et mise en pratique.
+🔹 Jour 3 : Approfondissement, API avancée et gestion des erreurs
+
+🔥 Organisation du projet en architecture MVC.
+🔥 Création d’une API avancée (exemple : gestion d’un stock ou d’un catalogue de produits).
+🔥 Gestion des erreurs propre et structuration du code propre.
+🔥 Tests avec Postman et correction des bugs éventuels.
+🔥 Déploiement (explication de comment mettre en ligne une API avec Railway, Render, etc.).
+🔥 QCM et mise en situation pour s’assurer que tu es prêt pour la mission.

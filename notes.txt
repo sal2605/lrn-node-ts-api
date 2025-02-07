@@ -1,0 +1,155 @@
+NOTES D'APPRENTISSAGE :
+
+**********Pour installer TypeScript :**********
+npm install -g typescript
+tsc -v
+
+**********Initialiser un projet Express avec TypeScript **********
+- on crée le dossier du projet et après on fait : 
+| Pour initialiser un projet Node.js :
+npm init -y 
+
+| Installer les dépendances 
+On installe Express, Sequelize et les outils nécessaires :
+npm install express sequelize mysql2 dotenv cors jsonwebtoken bcryptjs
+
+Et les types pour TypeScript :
+npm install --save-dev typescript @types/express @types/jsonwebtoken @types/bcryptjs
+
+********** CONFIGURER TYPESCRIPT **********
+Dans le projet, tape :
+tsc --init
+
+Ça va créer un fichier tsconfig.json, modifie-le comme ça :
+
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "CommonJS",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true
+  }
+}
+
+**********Créer le serveur Express**********
+On crée un dossier src et dedans on crée un fichier server.ts dans lequel on met du code à executer 
+| Explication du code
+import express : On importe Express.
+dotenv.config() : Charge les variables d’environnement.
+app.use(express.json()) : Permet de lire les requêtes JSON.
+app.get("/") : Une route simple qui retourne un message.
+app.listen(PORT, () => {...}) : Démarre le serveur.
+
+**********Lancer le serveur**********
+Dans le terminal, on met : 
+npx ts-node src/server.ts
+
+********** Sequelize : Connexion à une base de données **********
+Sequelize, c'est comme Eloquent de Laravel 
+On va utiliser Sequelize avec MySql.
+Crée un dossier config et dedans, un fichier database.ts pour la connexion à la base de données.
+
+**********Créer un modèle Sequelize********** 
+Créer un dossier models et dedans un fichier User.ts. 
+| Explication
+class User extends Model → On crée un modèle Sequelize.
+User.init({...}) → On définit les colonnes de la table.
+DataTypes → Spécifie les types des colonnes.
+
+AJOUT D'UN FICHIER .env A LA RACINE DU PROJET POUR GERER LA CONNEXION AVEC LA BD MySQL 
+DB_NAME=nom_de_ta_base
+DB_USER=ton_utilisateur
+DB_PASS=ton_mot_de_passe
+DB_HOST=localhost
+
+********** CRUD API : Routes utilisateurs********** 
+Crée un dossier routes et un fichier userRoutes.ts. 
+userRoutes gère les routes liées au model User 
+
+| Pour pouvoir executer des commandes de creation de models, migrations et autres, on doit installer Sequelize CLI : 
+Dans le terminal, on tape :
+npm install --save-dev sequelize-cli
+
+********** CONNEXION A UNE BASE DE DONNEES (MySQL) | on y va avec Node Js [node] **********
+| On réinitialise Sequelize en JavaScript 
+npx sequelize-cli init
+
+| Modifier config/config.js (au lieu de config.json) 
+On transforme config/config.json en config/config.js et configure la connexion à MySQL : 
+Voici un exemple de contenu pour la connexion : 
+---------------------------------------------------------------------
+require('dotenv').config(); // Charge les variables d'environnement
+
+module.exports = {
+  development: {
+    username: process.env.DB_USER || "root",
+    password: process.env.DB_PASS || null,
+    database: process.env.DB_NAME || "api_db",
+    host: process.env.DB_HOST || "127.0.0.1",
+    dialect: "mysql",
+    logging: false,
+  },
+  production: {
+    username: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
+    dialect: "mysql",
+    logging: false,
+  },
+};
+---------------------------------------------------------------------
+On s'assure d'avoir toutes les infos configurées dans le .env 
+
+| Modifier models/index.js pour utiliser le config/config.js (c'etait config.js qui etait configuré)
+Modification de sequelize : 
+---------------------------------------------------------------------
+const { Sequelize } = require("sequelize");
+const config = require("../config/config.js")[process.env.NODE_ENV || "development"];
+
+const sequelize = new Sequelize(config.database, config.username, config.password, {
+  host: config.host,
+  dialect: config.dialect,
+  logging: config.logging,
+});
+--------------------------------------------------------------------
+
+| Vérification de la connexion à la base de données 
+On ajoute un test de connexion en créant testDb.js à la racine ou dans un dossier : 
+contenu du fichier "testDb.js" : 
+--------------------------------------------------------------------
+const sequelize = require("./models/index.js");
+
+sequelize
+  .authenticate()
+  .then(() => console.log("✅ Connexion réussie à la base de données"))
+  .catch((err) => console.error("❌ Erreur de connexion :", err));
+--------------------------------------------------------------------
+
+| puis on execute : node testDb.js 
+
+| Apres que la connexion soit passée, on peut maintenant executer des commandes en rapport avec la BD : 
+- Ajout d'un model et d'une migration : 
+--------------------------------------------------------------------
+npx sequelize-cli model:generate --name User --attributes name:string,email:string,password:string
+--------------------------------------------------------------------
+Cela va créer :
+models/user.js
+migrations/YYYYMMDDHHMMSS-create-user.js 
+
+| Puis on peut executer la migration avec : 
+--------------------------------------------------------------------
+npx sequelize-cli db:migrate
+--------------------------------------------------------------------
+
+Voilà maintenant les models et autres éléments de la base de données sont gérés ailleurs et le typescript est dans le dossier src; 
+Dans le cas actuel, on doit importer le model User(géré dans models/User.js), dans le fichier des routes (userRoutes dans le cas actuel) 
+--------------------------------------------------------------------
+const { User } = require("../../models"); 
+--------------------------------------------------------------------
+// et ensuite utiliser User dans la suite du code. 
+
+-- Actuellement dans le projet, j'ai deux fichiers de connexion à la base de données : src/config/database.ts et config/config.js via models/index.js | c'est parce que le typescript ne me permettait pas d'interagir avec la base de données en paix, que j'ai decidé d'utiliser les vraies commandes des documentations de sequelize, c'est avec Node Js et tout marche tres bien. Du coup je vais supprimer la connexion src/config/database.ts et partout utiliser la connexion sequelize initialisée grâce à config/config.js dans models/index.js. 
+
+| Pour tester ces APIs avec PostMan, on doit renseigner les parametres en mode raw, sous format json, et au cas dans les headers pour la sortie, le content type serait pas bien configuré on ajoute en headers : Content-Type: application/json 
