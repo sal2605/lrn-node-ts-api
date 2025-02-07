@@ -153,3 +153,120 @@ const { User } = require("../../models");
 -- Actuellement dans le projet, j'ai deux fichiers de connexion à la base de données : src/config/database.ts et config/config.js via models/index.js | c'est parce que le typescript ne me permettait pas d'interagir avec la base de données en paix, que j'ai decidé d'utiliser les vraies commandes des documentations de sequelize, c'est avec Node Js et tout marche tres bien. Du coup je vais supprimer la connexion src/config/database.ts et partout utiliser la connexion sequelize initialisée grâce à config/config.js dans models/index.js. 
 
 | Pour tester ces APIs avec PostMan, on doit renseigner les parametres en mode raw, sous format json, et au cas dans les headers pour la sortie, le content type serait pas bien configuré on ajoute en headers : Content-Type: application/json 
+
+--------------------------------------------------------------------
+
+***** Dotenv : pour gerer les variables d'environnement 
+s'il n'etait pas installé, on l'aurait installé avec la commande suivante : 
+--------------------------------------------------------------------
+npm install dotenv | ensuite on créera le fichier .env à la racine du projet 
+--------------------------------------------------------------------
+| Chargement de dotenv dans le fichier de base (ici : server.ts) : 
+--------------------------------------------------------------------
+import dotenv from 'dotenv';
+-------------------------------------------------------------------- 
+dotenv.config() | Pour charger les variables d'environnement depuis le .env 
+--------------------------------------------------------------------
+
+***** Hash des mots de passe avec bcrypt : On ne stocke jamais un password en clair
+
+| Installation de bcrypt s'il n'etait pas deja installé 
+--------------------------------------------------------------------
+npm install bcrypt
+npm install -D @types/bcrypt
+--------------------------------------------------------------------
+
+| Hash d'un mot de passe 
+--------------------------------------------------------------------
+import bcrypt from 'bcrypt';
+
+User.beforeCreate(async (user) => {
+  user.password = await bcrypt.hash(user.password, 10);
+});
+--------------------------------------------------------------------
+
+| Verification du mot de passe 
+--------------------------------------------------------------------
+const isMatch = await bcrypt.compare(motDePasseSaisi, user.password);
+if (!isMatch) {
+  return res.status(401).json({ message: "Mot de passe incorrect" });
+}
+--------------------------------------------------------------------
+
+***** MISE EN PLACE DE L'AUTHENTIFICATION JWT 
+
+| Installation s'il etait pas installé 
+--------------------------------------------------------------------
+npm install jsonwebtoken
+npm install -D @types/jsonwebtoken
+--------------------------------------------------------------------
+
+| Génération d'un token après connexion :
+Dans auth.controller.ts :
+--------------------------------------------------------------------
+import jwt from 'jsonwebtoken';
+
+const token = jwt.sign(
+  { id: user.id, email: user.email }, 
+  process.env.JWT_SECRET as string, 
+  { expiresIn: "1h" }
+);
+res.json({ token });
+--------------------------------------------------------------------
+
+| Vérification du token dans un middleware 
+* On crée middleware/auth.ts : 
+--------------------------------------------------------------------
+import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+
+export const verifyToken = (req: Request, res: Response, next: NextFunction) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.status(403).json({ message: "Accès refusé" });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    res.status(401).json({ message: "Token invalide" });
+  }
+};
+--------------------------------------------------------------------
+* On ajoute ce middleware sur les routes protégées :
+--------------------------------------------------------------------
+router.get('/profile', verifyToken, (req, res) => {
+  res.json({ message: "Profil sécurisé", user: req.user });
+});
+--------------------------------------------------------------------
+
+***** CREATION DU SYSTEME D'AUTHENTIFICATION (INSCRIPTION + CONNEXION) 
+📌 Route d’inscription
+Dans auth.routes.ts :
+--------------------------------------------------------------------
+router.post('/register', async (req, res) => {
+  const { name, email, password } = req.body;
+  try {
+    const user = await User.create({ name, email, password });
+    res.status(201).json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Erreur lors de l'inscription", error });
+  }
+});
+--------------------------------------------------------------------
+
+📌 Route de connexion
+--------------------------------------------------------------------
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ where: { email } });
+  if (!user) return res.status(404).json({ message: "Utilisateur introuvable" });
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) return res.status(401).json({ message: "Mot de passe incorrect" });
+
+  const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET as string, { expiresIn: "1h" });
+  res.json({ token });
+});
+--------------------------------------------------------------------
+
