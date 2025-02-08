@@ -24,3 +24,14 @@
 🔥 Tests avec Postman et correction des bugs éventuels.
 🔥 Déploiement (explication de comment mettre en ligne une API avec Railway, Render, etc.).
 🔥 QCM et mise en situation pour s’assurer que tu es prêt pour la mission.
+
+-------------------------------------------------------------------------------------------------
+
+🚀 Plan de l’authentification avec express-validator 
+
+1- Installation des dépendances
+2- Création des routes d’inscription et connexion
+3- Validation des données avec express-validator
+4- Hashage du mot de passe avec bcrypt
+5- Génération et vérification du JWT
+6- Mise en place des middlewares de protection des routes

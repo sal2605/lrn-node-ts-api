@@ -270,3 +270,27 @@ router.post('/login', async (req, res) => {
 });
 --------------------------------------------------------------------
 
+************ VALIDATION DES DONNEES AVEC express-validator ************ 
+
+📌 1. Installation des dépendances
+--------------------------------------------------------------------
+npm install express-validator bcrypt jsonwebtoken
+npm install --save-dev @types/jsonwebtoken
+--------------------------------------------------------------------
+
+📌 2. Création du contrôleur AuthController.ts
+On crée le fichier src/controllers/AuthController.ts et on ajoute son contenu,
+| Dans ce fichier, on mettra les fonctions des routes d'authentification, la fonction qu'on doit par exemple mettre dans la route d'inscription, on mettra son code dans le controller et on l'appelera dans la route d'inscription.
+
+📌 3. Création des validations avec express-validator
+| On crée src/middlewares/authValidation.ts et on ajoute les fonctions de validation faites avec express-validator.
+| C'est comme pour les fonctions dans les controllers aussi, on ecrira leurs fonctions dans des fichiers middlewares de validation et on les importera dans les routes juste derrière les fonctions des routes mêmes. 
+
+📌 4. Création des routes d’authentification 
+| On crée src/routes/authRoutes.ts et on ajoute les routes avec Router, on met les routes dans les fichiers des routes comme dans web.php avec laravel et on ajoute les fonctions importées depuis les controllers, mais c'est quand même un peu different, par exemple les validations sont ajoutées directement dans les routes aussi. 
+
+📌 5. Protection des routes avec JWT
+| On crée src/middlewares/authMiddleware.ts et on ajoute le code.
+
+📌 6. Ajout des routes dans server.ts 
+| Dans src/server.ts, on importe les fichiers routes nécessaires et on ajoute le code qu'il faut. 

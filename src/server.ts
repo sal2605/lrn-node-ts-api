@@ -26,8 +26,10 @@ sequelize
   .catch((err: any) => console.error("Erreur de connexion MySQL :", err));
 
 import userRoutes from "./routes/userRoutes";
+import authRoutes from "./routes/authRoutes";
 
 app.use("/users", userRoutes);
+app.use("/api/auth", authRoutes);
 
 // Démarrer le serveur
 app.listen(PORT, () => {
