@@ -27,9 +27,13 @@ sequelize
 
 import userRoutes from "./routes/userRoutes";
 import authRoutes from "./routes/authRoutes";
+import productRoutes from "./routes/productRoutes";
+import profileRoutes from "./routes/profileRoutes";
 
-app.use("/users", userRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/users", userRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/profiles", profileRoutes);
 
 // Démarrer le serveur
 app.listen(PORT, () => {

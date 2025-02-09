@@ -1,0 +1,185 @@
+Les Méthodes de Sequelize pour Interagir avec la Base de Données 🔥
+---------------------------------------------------------------------------------------
+🔹 1. CRUD : Create, Read, Update, Delete
+
+***** CREATE ***** | INSERT : Insère un nouvel enregistrement dans la BD et retourne l'instance créée
+--------------------------------------------------------------------
+const user = await User.create({
+  name: "John Doe",
+  email: "john@example.com",
+  password: "hashed_password"
+});
+--------------------------------------------------------------------
+
+***** READ ***** | SELECT 
+Ex:
+--------------------------------------------------------------------
+const users = await User.findAll(); // Récupère tous les utilisateurs
+const user = await User.findOne({ where: { email: "john@example.com" } }); // Un seul utilisateur
+const userById = await User.findByPk(1); // Trouver par ID
+--------------------------------------------------------------------
+
+***** UPDATE ***** | .update(data, { where }) → Met à jour l’enregistrement qui correspond à where. 
+Ex:
+--------------------------------------------------------------------
+await User.update(
+  { name: "Jane Doe" }, 
+  { where: { id: 1 } }
+);
+--------------------------------------------------------------------
+
+***** DELETE ***** | .destroy({ where }) → Supprime les enregistrements qui correspondent à where.
+Ex:
+--------------------------------------------------------------------
+await User.destroy({ where: { id: 1 } });
+--------------------------------------------------------------------
+
+🔹 2. Opérateurs Sequelize pour les Conditions (Op) 
+| Sequelize fournit des opérateurs pour créer des requêtes avancées. 
+Ex:
+--------------------------------------------------------------------
+import { Op } from "sequelize";
+
+const users = await User.findAll({
+  where: {
+    age: { [Op.gte]: 18 }, // age >= 18
+    name: { [Op.like]: "%John%" } // LIKE '%John%'
+  }
+});
+--------------------------------------------------------------------
+
+🔑 Liste des principaux opérateurs :
+----------------------------------------------------------
+| Opérateur   |                 Explication              |
+----------------------------------------------------------
+| Op.eq	      |   = (Égal)                               |
+| Op.ne	      |   != (Différent)                         |
+| Op.gt	      |   > (Supérieur)                          |
+| Op.gte	  |   >= (Supérieur ou égal)                 |
+| Op.lt	      |   < (Inférieur)                          |
+| Op.lte	  |   <= (Inférieur ou égal)                 |
+| Op.like	  |   LIKE '%valeur%' (Recherche partielle)  |
+----------------------------------------------------------
+
+🔹 3. Requêtes Relationnelles (Jointures) | Include (comme le concept de with() en LARAVEL)
+Si User a une relation avec Post (User.hasMany(Post);), on peut récupérer un utilisateur avec ses articles (include fait une jointure).
+Ex:
+--------------------------------------------------------------------
+const userWithPosts = await User.findOne({
+  where: { id: 1 },
+  include: { model: Post, as: "posts" } // Charge les posts associés à l’utilisateur.
+});
+--------------------------------------------------------------------
+
+🔹 4. Transactions (Sécuriser plusieurs requêtes) | comme DB transaction en LARAVEL 
+Si on veut exécuter plusieurs opérations dans une transaction (si une échoue, tout est annulé), on utilise transaction. 
+Ex:
+--------------------------------------------------------------------
+import { sequelize } from "../models";
+
+const transaction = await sequelize.transaction(); // Créer une transaction
+try {
+  const user = await User.create({ name: "Alex" }, { transaction });
+  await Post.create({ title: "Mon Post", userId: user.id }, { transaction });
+
+  await transaction.commit(); // Valider la transaction
+} catch (error) {
+  await transaction.rollback(); // Annuler la transaction si une requête échoue.
+}
+--------------------------------------------------------------------
+
+📌 Récapitulatif des méthodes Sequelize
+----------------------------------------------------------------------------------------
+| Méthodes                          | Fonctions                                        |
+----------------------------------------------------------------------------------------
+| .create(data)                     | Créer un enregistrement                          |
+| .findAll()                        | Récupérer tous les enregistrements               |
+| .findOne({ where })               | Récupérer un enregistrement spécifique           |
+| .findByPk(id)                     | Récupérer un enregistrement par ID               |
+| .update(data, { where })          | Mettre à jour un enregistrement                  |
+| .destroy({ where })               | Supprimer un enregistrement                      |
+| Op.eq, Op.gt, Op.like             | Opérateurs pour conditions                       |
+| .include({ model: Model })        | Charger les relations (jointures)                |
+| sequelize.transaction()           | Exécuter plusieurs requêtes de manière sécurisée |
+----------------------------------------------------------------------------------------
+
+***** RELATIONS ENTRE MODELS EN SEQUELIZE *****
+
+📌 1. Types de relations en Sequelize
+Sequelize fonctionne comme Eloquent pour les relations. Voici les principaux types de relations :
+--------------------------------------------------------------------
+1️⃣ One-to-One (hasOne / belongsTo)
+2️⃣ One-to-Many (hasMany / belongsTo)
+3️⃣ Many-to-Many (belongsToMany) 
+--------------------------------------------------------------------
+
+Note : Pour chaque model, on met les relations dans la méthode "associate" 
+
+********** One-to-One (hasOne / belongsTo) **********
+Ex: Un utilisateur a un profil (User <-> Profile) 
+| Dans le model User.js, on aura : 
+--------------------------------------------------------------------
+User.hasOne(models.Profile, { foreignKey: 'userId', as: 'profile' });
+--------------------------------------------------------------------
+| Et dans Profile.js, on aura :
+--------------------------------------------------------------------
+Profile.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
+--------------------------------------------------------------------
+
+********** One-to-Many (hasMany / belongsTo) **********
+Ex: Un utilisateur peut avoir plusieurs produits (User <-> Product) 
+| Dans le model User.js, on aura : 
+--------------------------------------------------------------------
+User.hasMany(models.Product, { foreignKey: 'userId', as: 'products' });
+--------------------------------------------------------------------
+| Et dans Product.js, on aura :
+--------------------------------------------------------------------
+Product.belongsTo(models.User, { foreignKey: 'userId', as: 'owner' });
+--------------------------------------------------------------------
+--------------------------------------------------------------------
+
+********** Many-to-Many (belongsToMany) ********** 
+Ex: Un utilisateur peut avoir plusieurs rôles et un rôle peut appartenir à plusieurs utilisateurs (User <-> Role) 
+--- Ici c'est un peu différent des autres relations, on aura une table pivot contenant les deux clés (userId et roleId).
+| Dans le model User.js, on aura : 
+--------------------------------------------------------------------
+User.belongsToMany(models.Role, { through: 'UserRoles', foreignKey: 'userId', as: 'roles' });
+--------------------------------------------------------------------
+| Et dans Role.js, on aura :
+--------------------------------------------------------------------
+Role.belongsToMany(models.User, { through: 'UserRoles', foreignKey: 'roleId', as: 'users' });
+--------------------------------------------------------------------
+
+---------------------------------------------------------------------------------------
+| TRES INTERESSANT A SAVOIR SUR LES RELATIONS MANY-TO-MANY : 
+--------------------------------------------------------------------
+Une fois que tu définis une relation many-to-many entre deux modèles, Sequelize génère automatiquement des méthodes pratiques pour manipuler cette relation. Ces méthodes suivent un modèle préétabli, et c’est pour ça que tu vois des méthodes comme addRole, getRoles, etc entre User et Role.
+
+Si tu as une relation many-to-many entre User et Group, par exemple, Sequelize génère automatiquement des méthodes similaires pour gérer cette relation.
+Exemple avec User et Group :
+--------------------------------------------------------------------
+Si tu crées une relation many-to-many entre User et Group avec une table pivot UserGroup, Sequelize générera des méthodes comme :
+--------------------------------------------------------------------
+* addGroup(groupId) : Ajoute un groupe à un utilisateur.
+* getGroups() : Récupère tous les groupes associés à un utilisateur.
+* removeGroup(groupId) : Retire un groupe de l'utilisateur.
+* setGroups(groups) : Remplace les groupes associés à l'utilisateur. 
+--------------------------------------------------------------------
+Ex. pour setGroups :
+const newGroups = await Group.findAll(); // avec un where dedans on veut 
+await user?.setGroups(newGroups);  
+--------------------------------------------------------------------
+
+| ********* ET C'EST PAREIL POUR LES AUTRES RELATIONS AUSSI ********* |
+Ex. avec One-to-One : 
+- On aura des méthodes comme setModel, getModel, et createModel.
+* Avec User et Profile on peut avoir : 
+--------------------------------------------------------------------
+const user = await User.findByPk(1);
+const profile = await Profile.create({ bio: 'Bio de l\'utilisateur' });
+
+await user?.setProfile(profile); // Associer un profil à l'utilisateur
+--------------------------------------------------------------------
+
+| ********* One-to-Many : PAREIL AUSSI ********* |
+

@@ -294,3 +294,8 @@ On crée le fichier src/controllers/AuthController.ts et on ajoute son contenu,
 
 📌 6. Ajout des routes dans server.ts 
 | Dans src/server.ts, on importe les fichiers routes nécessaires et on ajoute le code qu'il faut. 
+
+Dans : user?.addPost(post) par exemple :
+Ce que fait l'opérateur ? :
+L'opérateur ?. permet d'accéder à une propriété ou d'appeler une méthode sur un objet, mais de manière sécurisée. Si l'objet est null ou undefined, au lieu de générer une erreur, l'expression renvoie undefined. Cela permet d'éviter des erreurs du type TypeError: Cannot read property '...' of null. 
+

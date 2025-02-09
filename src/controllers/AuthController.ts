@@ -10,7 +10,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "secret_key"; // Clé secrète JWT
 export const register = async (req: Request, res: Response) => {
   try {
     // Vérifier les erreurs de validation
-    const errors = validationResult(req); // On precise la constante de validation à utiliser dans la route
+    const errors = validationResult(req); // On precise la constante de validation à utiliser dans la route là bas
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
