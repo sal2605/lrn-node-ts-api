@@ -3,6 +3,7 @@ const { authenticate } = require("../middlewares/authMiddleware");
 const { User } = require("../../models");
 const { Product } = require("../../models");
 const { Profile } = require("../../models");
+const { Role } = require("../../models");
 
 // Vérifie si l'objet User est bien chargé 
 // console.log(User);
@@ -42,7 +43,7 @@ router.get("/", authenticate, async (req, res) => {
 // Récupérer un utilisateur par ID
 router.get("/:id", async (req, res) => {
   try {
-    const user = await User.findByPk(req.params.id, { include: [{ model: Product, as: 'products' }, { model: Profile, as: 'profile' }] }); // Quand on veut charger plusieurs relations, on ajoute les crochets []
+    const user = await User.findByPk(req.params.id, { include: [{ model: Product, as: 'products' }, { model: Profile, as: 'profile' }, { model: Role, as: 'roles' }] }); // Quand on veut charger plusieurs relations, on ajoute les crochets []
     res.json(user);
   } catch (error) {
     console.error("Error showing user:", error);

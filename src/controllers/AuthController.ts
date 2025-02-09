@@ -3,6 +3,7 @@ import { validationResult } from "express-validator";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 const { User } = require("../../models");
+const { Role } = require("../../models");
 
 const JWT_SECRET = process.env.JWT_SECRET || "secret_key"; // Clé secrète JWT
 
@@ -15,7 +16,7 @@ export const register = async (req: Request, res: Response) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, email, password } = req.body;
+    const { name, email, password, roleName } = req.body;
 
     // Vérifier si l'utilisateur existe déjà
     const existingUser = await User.findOne({ where: { email } });
@@ -28,6 +29,17 @@ export const register = async (req: Request, res: Response) => {
 
     // Créer l'utilisateur
     const user = await User.create({ name, email, password: hashedPassword });
+
+    // Le role renseigné 
+    const role = await Role.findOne({ where: { roleName } });
+
+    if (role) {
+      user?.addRole(role); // les methodes comme addModel sont fournies par sequelize lorsqu'on implemente des relations 
+    } else {
+      user?.addRole(3);
+    }
+
+    // console.log(role);
 
     // Générer un token JWT
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {

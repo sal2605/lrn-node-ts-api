@@ -29,9 +29,11 @@ import userRoutes from "./routes/userRoutes";
 import authRoutes from "./routes/authRoutes";
 import productRoutes from "./routes/productRoutes";
 import profileRoutes from "./routes/profileRoutes";
+import roleRoutes from "./routes/roleRoutes";
 
 app.use("/api/auth", authRoutes);
 app.use("/users", userRoutes);
+app.use("/api/roles", roleRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/profiles", profileRoutes);
 

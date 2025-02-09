@@ -105,7 +105,7 @@ try {
 
 ***** RELATIONS ENTRE MODELS EN SEQUELIZE *****
 
-📌 1. Types de relations en Sequelize
+📌 Types de relations en Sequelize
 Sequelize fonctionne comme Eloquent pour les relations. Voici les principaux types de relations :
 --------------------------------------------------------------------
 1️⃣ One-to-One (hasOne / belongsTo)
@@ -149,6 +149,7 @@ User.belongsToMany(models.Role, { through: 'UserRoles', foreignKey: 'userId', as
 --------------------------------------------------------------------
 Role.belongsToMany(models.User, { through: 'UserRoles', foreignKey: 'roleId', as: 'users' });
 --------------------------------------------------------------------
+| Le "through" qui s'ajoute pour les relations Many, c'est pour spécifier le model Pivot.
 
 ---------------------------------------------------------------------------------------
 | TRES INTERESSANT A SAVOIR SUR LES RELATIONS MANY-TO-MANY : 
@@ -182,4 +183,14 @@ await user?.setProfile(profile); // Associer un profil à l'utilisateur
 --------------------------------------------------------------------
 
 | ********* One-to-Many : PAREIL AUSSI ********* |
+
+-----------------------------------------------------------------------------------------
+| CHARGEMENT DES RELATIONS (include)
+-----------------------------------------------------------------------------------------
+Sequelize permet de récupérer les relations avec include. 
+Some Examples : 
+---------------------------------------------------------------------------------------------------
+| const user = await User.findByPk(req.params.id, { include: [{ model: Product, as: 'products' }, { model: Profile, as: 'profile' }, { model: Role, as: 'roles' }] }); // Quand on veut charger plusieurs relations, on ajoute les crochets []
+| const product = await Product.findByPk(req.params.id, { include: { model: User, as: 'owner' } });
+---------------------------------------------------------------------------------------------------
 
