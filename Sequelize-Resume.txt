@@ -194,3 +194,68 @@ Some Examples :
 | const product = await Product.findByPk(req.params.id, { include: { model: User, as: 'owner' } });
 ---------------------------------------------------------------------------------------------------
 
+
+| ******************** LES SEEDERS ******************** |
+1. Generer un seeder : 
+--------------------------------------------------------------------
+npx sequelize-cli seed:generate --name demo-users
+--------------------------------------------------------------------
+Cela va créer un fichier dans le dossier seeders/, comme ceci :
+  seeders/
+    ├── 20240210123456-demo-users.js
+
+2. Modifier le seeder 
+Ex de code de seeder : 
+----------------------------------------------------------------------------------
+'use strict';
+
+const bcrypt = require('bcrypt');
+
+module.exports = {
+  async up(queryInterface, Sequelize) {
+    await queryInterface.bulkInsert('Users', [
+      {
+        name: 'John Doe',
+        email: 'johndoe@example.com',
+        password: await bcrypt.hash('12345678', 10), // Hasher ici 
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        name: 'Jane Doe',
+        email: 'janedoe@example.com',
+        password: await bcrypt.hash('12345678', 10), 
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+    ], {});
+  },
+
+  async down(queryInterface, Sequelize) {
+    await queryInterface.bulkDelete('Users', null, {});
+  }
+};
+
+----------------------------------------------------------------------------------
+Explications :
+- bulkInsert('Users', [...]) → Ajoute plusieurs entrées dans la table Users.
+- bulkDelete('Users', null, {}) → Supprime les données en cas de rollback.
+
+3. Executer les seeders 
+----------------------------------------------------------------------------------
+npx sequelize-cli db:seed:all
+----------------------------------------------------------------------------------
+| Pour éxécuter un seeder spécifique :
+----------------------------------------------------------------------------------
+npx sequelize-cli db:seed --seed 20240210123456-demo-users.js
+----------------------------------------------------------------------------------
+
+4️. Supprimer les Seeders (Rollback)
+Pour annuler les seeders (supprimer les données insérées) :
+----------------------------------------------------------------------------------
+npx sequelize-cli db:seed:undo
+----------------------------------------------------------------------------------
+Ou pour tout supprimer :
+----------------------------------------------------------------------------------
+npx sequelize-cli db:seed:undo:all
+----------------------------------------------------------------------------------
