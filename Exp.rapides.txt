@@ -1,2 +1,0 @@
-Les middlewares sont utilisés pour traiter des requêtes avant qu'elles n'atteignent la route de traitement finale.
-
