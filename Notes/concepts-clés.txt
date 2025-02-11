@@ -1,4 +1,3 @@
-Partie 1 
 Concepts clés à comprendre
 
     Express : Express est un framework pour Node.js qui simplifie la création d'applications web. Il vous permet de définir des routes (les chemins de l'URL) et de gérer les requêtes HTTP (GET, POST, etc.).
@@ -10,16 +9,3 @@ Concepts clés à comprendre
         GET / : Récupère tous les utilisateurs.
         GET /:id : Récupère un utilisateur par son ID.
 
-    Les méthodes Sequelize :
-        User.create() : Crée un utilisateur dans la base de données.
-        User.findAll() : Récupère tous les utilisateurs.
-        User.findByPk() : Récupère un utilisateur en fonction de sa clé primaire (son ID).
-
-    Le corps de la requête (req.body) : Lorsque vous envoyez des données à votre serveur via une requête POST, ces données se trouvent dans req.body. Pour que cela fonctionne, vous devez avoir un middleware qui analyse le corps des requêtes (généralement express.json() ou express.urlencoded()).
-
-Ce que vous pouvez faire ensuite :
-
-    Valider les données : Avant de créer un utilisateur, vous pouvez valider les données envoyées (par exemple, vérifier que l'email est bien formé, que le mot de passe a une longueur minimale, etc.).
-    Ajouter une gestion des erreurs : Par exemple, gérer le cas où un utilisateur n'est pas trouvé dans la route GET avec un ID.
-    Protéger les mots de passe : Avant de sauvegarder un mot de passe, vous devriez le hacher (utiliser des bibliothèques comme bcrypt).
-    Faire de l'authentification : Ajouter une authentification via un token JWT (JSON Web Token) pour sécuriser l'accès aux routes.
